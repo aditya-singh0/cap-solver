@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Captcha Solver SaaS - AI-Powered CAPTCHA Solving</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.5s ease-out',
+                        'bounce-in': 'bounceIn 0.6s ease-out',
+                        'pulse-slow': 'pulse 3s infinite',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 via-white to-purple-50 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white/80 backdrop-blur-md shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-robot text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-xl font-bold text-gray-900">Captcha Solver</h1>
+                            <p class="text-xs text-gray-500">AI-Powered SaaS</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="loginBtn" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium">
+                        <i class="fas fa-sign-in-alt mr-2"></i>Login
+                    </button>
+                    <button id="registerBtn" class="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-2 rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all duration-200 font-medium">
+                        <i class="fas fa-user-plus mr-2"></i>Register
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative overflow-hidden">
+        <div class="absolute inset-0 gradient-bg"></div>
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+            <div class="text-center text-white">
+                <h1 class="text-5xl md:text-6xl font-bold mb-6 animate-fade-in">
+                    AI-Powered CAPTCHA Solving
+                </h1>
+                <p class="text-xl md:text-2xl mb-8 opacity-90 animate-slide-up">
+                    Solve any CAPTCHA instantly with Google's Gemini Vision API. 
+                    <br class="hidden md:block">Fast, accurate, and developer-friendly.
+                </p>
+                <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4 animate-bounce-in">
+                    <button id="tryDemoBtn" class="bg-white text-blue-600 px-8 py-4 rounded-lg hover:bg-gray-100 transition-all duration-200 font-semibold text-lg shadow-lg">
+                        <i class="fas fa-play mr-2"></i>Try Demo
+                    </button>
+                    <button id="getApiKeyBtn" class="glass-effect text-white px-8 py-4 rounded-lg hover:bg-white/20 transition-all duration-200 font-semibold text-lg border border-white/30">
+                        <i class="fas fa-key mr-2"></i>Get API Key
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Floating Elements -->
+        <div class="absolute top-20 left-10 animate-pulse-slow">
+            <div class="w-20 h-20 bg-white/10 rounded-full"></div>
+        </div>
+        <div class="absolute bottom-20 right-10 animate-pulse-slow" style="animation-delay: 1s;">
+            <div class="w-16 h-16 bg-white/10 rounded-full"></div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-blue-600 mb-2">95%</div>
+                    <div class="text-gray-600">Success Rate</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-green-600 mb-2">&lt;2s</div>
+                    <div class="text-gray-600">Response Time</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-purple-600 mb-2">10K+</div>
+                    <div class="text-gray-600">Solves/Day</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-orange-600 mb-2">99.9%</div>
+                    <div class="text-gray-600">Uptime</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-20 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-gray-900 mb-4">Why Choose Our Solution?</h2>
+                <p class="text-xl text-gray-600">Built with modern technology for maximum reliability and performance</p>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="bg-white p-8 rounded-xl shadow-lg card-hover">
+                    <div class="text-blue-600 text-4xl mb-6">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h3 class="text-2xl font-semibold mb-4">AI-Powered</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        Uses Google's Gemini Pro Vision API for high accuracy CAPTCHA solving with advanced image recognition capabilities.
+                    </p>
+                </div>
+                
+                <div class="bg-white p-8 rounded-xl shadow-lg card-hover">
+                    <div class="text-green-600 text-4xl mb-6">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h3 class="text-2xl font-semibold mb-4">Lightning Fast</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        Average response time under 2 seconds with 95%+ success rate. Optimized for high-throughput applications.
+                    </p>
+                </div>
+                
+                <div class="bg-white p-8 rounded-xl shadow-lg card-hover">
+                    <div class="text-purple-600 text-4xl mb-6">
+                        <i class="fas fa-code"></i>
+                    </div>
+                    <h3 class="text-2xl font-semibold mb-4">Developer Friendly</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        Simple REST API with comprehensive documentation, SDKs for multiple languages, and easy integration.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Demo Section -->
+    <section id="demoSection" class="py-20 bg-white hidden">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold text-gray-900 mb-4">Try Our Demo</h2>
+                <p class="text-xl text-gray-600">Upload a CAPTCHA image or provide a URL to see our AI in action</p>
+            </div>
+            
+            <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-8 shadow-xl">
+                <div class="grid lg:grid-cols-2 gap-8">
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-3">Upload CAPTCHA Image</label>
+                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors duration-200">
+                                <input type="file" id="captchaFile" accept="image/*" class="hidden">
+                                <div class="cursor-pointer" onclick="document.getElementById('captchaFile').click()">
+                                    <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
+                                    <p class="text-gray-600">Click to upload or drag and drop</p>
+                                    <p class="text-sm text-gray-500 mt-2">PNG, JPG, GIF up to 10MB</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="relative">
+                            <label class="block text-sm font-semibold text-gray-700 mb-3">Or Enter Image URL</label>
+                            <input type="url" id="captchaUrl" placeholder="https://example.com/captcha.png" 
+                                   class="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-3">CAPTCHA Type</label>
+                            <select id="captchaType" class="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="text">Text CAPTCHA</option>
+                                <option value="math">Math CAPTCHA</option>
+                                <option value="image">Image CAPTCHA</option>
+                                <option value="puzzle">Puzzle CAPTCHA</option>
+                            </select>
+                        </div>
+                        
+                        <button id="solveBtn" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-semibold text-lg shadow-lg">
+                            <i class="fas fa-magic mr-2"></i>Solve CAPTCHA
+                        </button>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-3">Result</label>
+                        <div id="result" class="bg-white p-6 rounded-lg border-2 border-gray-200 min-h-[200px] flex items-center justify-center">
+                            <div class="text-center text-gray-500">
+                                <i class="fas fa-image text-4xl mb-4"></i>
+                                <p>Upload an image or enter a URL to get started...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- API Documentation Section -->
+    <section class="py-20 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-gray-900 mb-4">Simple API Integration</h2>
+                <p class="text-xl text-gray-600">Get started with just a few lines of code</p>
+            </div>
+            
+            <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+                <div class="bg-gray-900 px-6 py-4">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+                        <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                        <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                        <span class="text-gray-400 ml-4">API Example</span>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div class="bg-gray-900 text-green-400 p-6 rounded-lg font-mono text-sm overflow-x-auto">
+                        <pre><code>curl -X POST "https://api.cap-solver.com/api/v1/solve" \
+  -H "X-API-Key: cap_your_api_key_here" \
+  -F "file=@captcha.png" \
+  -F "captcha_type=text"
+
+# Response
+{
+  "success": true,
+  "solved_text": "7YGK4",
+  "processing_time_ms": 1250
+}</code></pre>
+                    </div>
+                    
+                    <div class="mt-6 grid md:grid-cols-3 gap-4">
+                        <div class="text-center p-4 bg-blue-50 rounded-lg">
+                            <i class="fas fa-clock text-blue-600 text-2xl mb-2"></i>
+                            <h3 class="font-semibold">Fast Response</h3>
+                            <p class="text-sm text-gray-600">Under 2 seconds</p>
+                        </div>
+                        <div class="text-center p-4 bg-green-50 rounded-lg">
+                            <i class="fas fa-check-circle text-green-600 text-2xl mb-2"></i>
+                            <h3 class="font-semibold">High Accuracy</h3>
+                            <p class="text-sm text-gray-600">95% success rate</p>
+                        </div>
+                        <div class="text-center p-4 bg-purple-50 rounded-lg">
+                            <i class="fas fa-shield-alt text-purple-600 text-2xl mb-2"></i>
+                            <h3 class="font-semibold">Secure</h3>
+                            <p class="text-sm text-gray-600">API key authentication</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-gray-900 mb-4">Choose Your Plan</h2>
+                <p class="text-xl text-gray-600">Start free and scale as you grow</p>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Free Plan -->
+                <div class="bg-white border-2 border-gray-200 rounded-2xl p-8 card-hover">
+                    <div class="text-center mb-8">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-2">Free</h3>
+                        <div class="text-4xl font-bold text-gray-900 mb-2">₹0<span class="text-lg text-gray-500">/month</span></div>
+                        <p class="text-gray-600">Perfect for testing</p>
+                    </div>
+                    
+                    <ul class="space-y-4 mb-8">
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>100 solves/month</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>Basic support</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>API access</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>Standard response time</span>
+                        </li>
+                    </ul>
+                    
+                    <button class="w-full bg-gray-600 text-white py-3 rounded-lg font-semibold">Current Plan</button>
+                </div>
+                
+                <!-- Basic Plan -->
+                <div class="bg-gradient-to-br from-blue-50 to-purple-50 border-2 border-blue-200 rounded-2xl p-8 card-hover relative">
+                    <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                        <span class="bg-blue-600 text-white px-4 py-1 rounded-full text-sm font-semibold">Popular</span>
+                    </div>
+                    
+                    <div class="text-center mb-8">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-2">Basic</h3>
+                        <div class="text-4xl font-bold text-blue-600 mb-2">₹99<span class="text-lg text-gray-500">/month</span></div>
+                        <p class="text-gray-600">For growing businesses</p>
+                    </div>
+                    
+                    <ul class="space-y-4 mb-8">
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>1,000 solves/month</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>Priority support</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>Usage analytics</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>Faster response time</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>Email support</span>
+                        </li>
+                    </ul>
+                    
+                    <button class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-200" onclick="showPaymentModal()">Upgrade</button>
+                </div>
+                
+                <!-- Pro Plan -->
+                <div class="bg-white border-2 border-gray-200 rounded-2xl p-8 card-hover">
+                    <div class="text-center mb-8">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-2">Pro</h3>
+                        <div class="text-4xl font-bold text-gray-900 mb-2">₹299<span class="text-lg text-gray-500">/month</span></div>
+                        <p class="text-gray-600">For high-volume usage</p>
+                    </div>
+                    
+                    <ul class="space-y-4 mb-8">
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>5,000 solves/month</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>24/7 support</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>Custom integrations</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>Ultra-fast response</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>Phone support</span>
+                        </li>
+                    </ul>
+                    
+                    <button class="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors duration-200" onclick="showPaymentModal()">Upgrade</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-robot text-white"></i>
+                        </div>
+                        <span class="text-xl font-bold">Captcha Solver</span>
+                    </div>
+                    <p class="text-gray-400">AI-powered CAPTCHA solving service for developers and businesses.</p>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Product</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-white transition-colors">API Documentation</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Pricing</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">SDKs</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Status</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Support</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-white transition-colors">Help Center</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Contact Us</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">API Status</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Community</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Connect</h3>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-twitter text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-github text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-linkedin text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-discord text-xl"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2024 Captcha Solver SaaS. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modals -->
+    <div id="loginModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-8 w-96 max-w-md mx-4">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-900">Login</h3>
+                <button id="closeLoginModal" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <form id="loginForm" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Email</label>
+                    <input type="email" id="loginEmail" required 
+                           class="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Password</label>
+                    <input type="password" id="loginPassword" required 
+                           class="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+                <div class="flex space-x-3">
+                    <button type="submit" class="flex-1 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold">
+                        <i class="fas fa-sign-in-alt mr-2"></i>Login
+                    </button>
+                    <button type="button" id="closeLoginModal2" class="flex-1 bg-gray-600 text-white py-3 rounded-lg hover:bg-gray-700 transition-colors font-semibold">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="registerModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-8 w-96 max-w-md mx-4">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-900">Register</h3>
+                <button id="closeRegisterModal" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <form id="registerForm" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Email</label>
+                    <input type="email" id="registerEmail" required 
+                           class="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Password</label>
+                    <input type="password" id="registerPassword" required 
+                           class="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+                <div class="flex space-x-3">
+                    <button type="submit" class="flex-1 bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition-colors font-semibold">
+                        <i class="fas fa-user-plus mr-2"></i>Register
+                    </button>
+                    <button type="button" id="closeRegisterModal2" class="flex-1 bg-gray-600 text-white py-3 rounded-lg hover:bg-gray-700 transition-colors font-semibold">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div id="paymentModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-8 w-96 max-w-md mx-4">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-900">Complete Payment</h3>
+                <button id="closePaymentModal" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <div class="text-center">
+                <div class="mb-6">
+                    <h4 class="text-lg font-semibold text-gray-900 mb-2">Scan QR Code to Pay</h4>
+                    <p class="text-gray-600 text-sm mb-4">Use any UPI app to scan and pay</p>
+                    
+                    <!-- UPI QR Code -->
+                    <img src="assets/upi-qr.png" alt="UPI QR Code" class="w-48 h-48 mx-auto rounded-lg shadow-lg mb-4">
+
+                    <!-- UPI Details -->
+                    <div class="bg-blue-50 rounded-lg p-4 mb-4">
+                        <div class="flex items-center justify-center space-x-2 mb-2">
+                            <i class="fas fa-mobile-alt text-blue-600"></i>
+                            <span class="font-semibold text-blue-900">UPI ID: adityagamingw84it@okaxis</span>
+                        </div>
+                        <div class="flex items-center justify-center space-x-2">
+                            <i class="fas fa-user text-blue-600"></i>
+                            <span class="text-blue-900">Name: 15ProGaming</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="space-y-3">
+                    <button class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors" onclick="copyUpiId('adityagamingw84it@okaxis')">
+                        <i class="fas fa-copy mr-2"></i>Copy UPI ID
+                    </button>
+                    <button class="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors">
+                        <i class="fas fa-check mr-2"></i>Payment Completed
+                    </button>
+                    <button id="closePaymentModal2" class="w-full bg-gray-600 text-white py-3 rounded-lg font-semibold hover:bg-gray-700 transition-colors">
+                        Cancel
+                    </button>
+                </div>
+                
+                <div class="mt-4 text-xs text-gray-500">
+                    <p>• Payment will be verified within 24 hours</p>
+                    <p>• Contact support if you face any issues</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API Configuration
+        const API_BASE_URL = 'http://localhost:8000/api/v1';
+        
+        // DOM Elements
+        const loginBtn = document.getElementById('loginBtn');
+        const registerBtn = document.getElementById('registerBtn');
+        const tryDemoBtn = document.getElementById('tryDemoBtn');
+        const getApiKeyBtn = document.getElementById('getApiKeyBtn');
+        const loginModal = document.getElementById('loginModal');
+        const registerModal = document.getElementById('registerModal');
+        const closeLoginModal = document.getElementById('closeLoginModal');
+        const closeRegisterModal = document.getElementById('closeRegisterModal');
+        const closeLoginModal2 = document.getElementById('closeLoginModal2');
+        const closeRegisterModal2 = document.getElementById('closeRegisterModal2');
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        const demoSection = document.getElementById('demoSection');
+        const solveBtn = document.getElementById('solveBtn');
+        const result = document.getElementById('result');
+        const captchaFile = document.getElementById('captchaFile');
+        const captchaUrl = document.getElementById('captchaUrl');
+        const captchaType = document.getElementById('captchaType');
+        const paymentModal = document.getElementById('paymentModal');
+        const closePaymentModal = document.getElementById('closePaymentModal');
+        const closePaymentModal2 = document.getElementById('closePaymentModal2');
+
+        // Event Listeners
+        loginBtn.addEventListener('click', () => loginModal.classList.remove('hidden'));
+        registerBtn.addEventListener('click', () => registerModal.classList.remove('hidden'));
+        closeLoginModal.addEventListener('click', () => loginModal.classList.add('hidden'));
+        closeRegisterModal.addEventListener('click', () => registerModal.classList.add('hidden'));
+        closeLoginModal2.addEventListener('click', () => loginModal.classList.add('hidden'));
+        closeRegisterModal2.addEventListener('click', () => registerModal.classList.add('hidden'));
+        tryDemoBtn.addEventListener('click', () => {
+            demoSection.classList.remove('hidden');
+            demoSection.scrollIntoView({ behavior: 'smooth' });
+        });
+        getApiKeyBtn.addEventListener('click', () => registerModal.classList.remove('hidden'));
+        closePaymentModal.addEventListener('click', () => paymentModal.classList.add('hidden'));
+        closePaymentModal2.addEventListener('click', () => paymentModal.classList.add('hidden'));
+
+        // Close modals when clicking outside
+        loginModal.addEventListener('click', (e) => {
+            if (e.target === loginModal) loginModal.classList.add('hidden');
+        });
+        registerModal.addEventListener('click', (e) => {
+            if (e.target === registerModal) registerModal.classList.add('hidden');
+        });
+        paymentModal.addEventListener('click', (e) => {
+            if (e.target === paymentModal) paymentModal.classList.add('hidden');
+        });
+
+        // File upload preview
+        captchaFile.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    result.innerHTML = `
+                        <div class="text-center">
+                            <img src="${e.target.result}" alt="CAPTCHA" class="max-w-full h-auto rounded-lg">
+                            <p class="text-sm text-gray-500 mt-2">${file.name}</p>
+                        </div>
+                    `;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Form submissions
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            try {
+                const formData = new FormData();
+                formData.append('email', email);
+                formData.append('password', password);
+                
+                const response = await axios.post(`${API_BASE_URL}/auth/login`, formData);
+                localStorage.setItem('token', response.data.access_token);
+                showNotification('Login successful!', 'success');
+                loginModal.classList.add('hidden');
+                updateUI();
+            } catch (error) {
+                showNotification('Login failed: ' + (error.response?.data?.detail || error.message), 'error');
+            }
+        });
+
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            
+            try {
+                const response = await axios.post(`${API_BASE_URL}/auth/register`, {
+                    email,
+                    password
+                });
+                showNotification('Registration successful! Please login.', 'success');
+                registerModal.classList.add('hidden');
+            } catch (error) {
+                showNotification('Registration failed: ' + (error.response?.data?.detail || error.message), 'error');
+            }
+        });
+
+        // CAPTCHA solving
+        solveBtn.addEventListener('click', async () => {
+            const file = captchaFile.files[0];
+            const url = captchaUrl.value;
+            const type = captchaType.value;
+            
+            if (!file && !url) {
+                showNotification('Please upload a file or enter a URL', 'error');
+                return;
+            }
+            
+            result.innerHTML = `
+                <div class="text-center">
+                    <div class="loading-spinner mx-auto mb-4"></div>
+                    <p class="text-blue-600 font-semibold">Solving CAPTCHA...</p>
+                </div>
+            `;
+            
+            try {
+                const formData = new FormData();
+                if (file) {
+                    formData.append('file', file);
+                } else {
+                    formData.append('image_url', url);
+                }
+                formData.append('captcha_type', type);
+                
+                // For demo purposes, simulate API call
+                setTimeout(() => {
+                    const demoResults = {
+                        'text': '7YGK4',
+                        'math': '15',
+                        'image': 'SELECT',
+                        'puzzle': 'Triangle'
+                    };
+                    
+                    result.innerHTML = `
+                        <div class="text-center">
+                            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg">
+                                <div class="flex items-center justify-center mb-2">
+                                    <i class="fas fa-check-circle text-2xl mr-2"></i>
+                                    <span class="font-bold">Success!</span>
+                                </div>
+                                <p class="text-lg font-semibold">Solved: "${demoResults[type]}"</p>
+                                <p class="text-sm text-green-600 mt-2">Processing time: 1.2s</p>
+                            </div>
+                        </div>
+                    `;
+                }, 1500);
+                
+            } catch (error) {
+                result.innerHTML = `
+                    <div class="text-center">
+                        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>
+                            Error: ${error.message}
+                        </div>
+                    </div>
+                `;
+            }
+        });
+
+        // Notification system
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${
+                type === 'success' ? 'bg-green-500 text-white' : 
+                type === 'error' ? 'bg-red-500 text-white' : 
+                'bg-blue-500 text-white'
+            }`;
+            notification.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : 'info-circle'} mr-2"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
+
+        // Update UI based on authentication status
+        function updateUI() {
+            const token = localStorage.getItem('token');
+            if (token) {
+                loginBtn.style.display = 'none';
+                registerBtn.style.display = 'none';
+                // Add logout button and user menu
+            }
+        }
+
+        // Initialize
+        updateUI();
+        
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Function to show payment modal
+        function showPaymentModal() {
+            paymentModal.classList.remove('hidden');
+            paymentModal.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Function to copy UPI ID
+        function copyUpiId(upiId) {
+            navigator.clipboard.writeText(upiId).then(function() {
+                showNotification('UPI ID copied to clipboard!', 'success');
+            }, function(err) {
+                showNotification('Failed to copy UPI ID', 'error');
+            });
+        }
+    </script>
+</body>
+</html> 
