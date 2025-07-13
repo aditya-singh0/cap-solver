@@ -1,1 +1,0 @@
-# Captcha Solver SaaS Application 
