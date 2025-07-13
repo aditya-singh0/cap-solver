@@ -18,7 +18,7 @@ class User(Base):
 
 Base.metadata.create_all(bind=engine)
 
-router = APIRouter()
+router = APIRouter(prefix="/api/v1")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 class UserCreate(BaseModel):

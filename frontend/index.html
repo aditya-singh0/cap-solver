@@ -662,43 +662,56 @@
             }
         });
 
-        // Form submissions
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-            
-            try {
-                const formData = new FormData();
-                formData.append('email', email);
-                formData.append('password', password);
-                
-                const response = await axios.post(`${API_BASE_URL}/auth/login`, formData);
-                localStorage.setItem('token', response.data.access_token);
-                showNotification('Login successful!', 'success');
-                loginModal.classList.add('hidden');
-                updateUI();
-            } catch (error) {
-                showNotification('Login failed: ' + (error.response?.data?.detail || error.message), 'error');
-            }
-        });
+        // SIGNUP FORM HANDLER
+        if (registerForm) {
+            registerForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const username = document.getElementById('registerEmail').value;
+                const password = document.getElementById('registerPassword').value;
+                try {
+                    const response = await fetch(`${API_BASE_URL}/signup`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, password })
+                    });
+                    const data = await response.json();
+                    if (response.ok) {
+                        showNotification('Registration successful! Please login.', 'success');
+                        registerModal.classList.add('hidden');
+                    } else {
+                        showNotification(data.detail || 'Registration failed', 'error');
+                    }
+                } catch (err) {
+                    showNotification('Registration error', 'error');
+                }
+            });
+        }
 
-        registerForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('registerEmail').value;
-            const password = document.getElementById('registerPassword').value;
-            
-            try {
-                const response = await axios.post(`${API_BASE_URL}/auth/register`, {
-                    email,
-                    password
-                });
-                showNotification('Registration successful! Please login.', 'success');
-                registerModal.classList.add('hidden');
-            } catch (error) {
-                showNotification('Registration failed: ' + (error.response?.data?.detail || error.message), 'error');
-            }
-        });
+        // LOGIN FORM HANDLER
+        if (loginForm) {
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const username = document.getElementById('loginEmail').value;
+                const password = document.getElementById('loginPassword').value;
+                try {
+                    const response = await fetch(`${API_BASE_URL}/login`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, password })
+                    });
+                    const data = await response.json();
+                    if (response.ok) {
+                        showNotification('Login successful!', 'success');
+                        loginModal.classList.add('hidden');
+                        // Optionally store user info/token here
+                    } else {
+                        showNotification(data.detail || 'Login failed', 'error');
+                    }
+                } catch (err) {
+                    showNotification('Login error', 'error');
+                }
+            });
+        }
 
         // CAPTCHA solving
         solveBtn.addEventListener('click', async () => {

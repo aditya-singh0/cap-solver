@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import capsolver
 import json
@@ -9,6 +10,15 @@ from auth_api import router as auth_router
 
 app = FastAPI()
 app.include_router(auth_router)
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:8080", "http://127.0.0.1:8080"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Set your API key from environment variable
 capsolver.api_key = os.getenv("CAPSOLVER_API_KEY", "YOUR_CAPSOLVER_API_KEY")
