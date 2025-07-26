@@ -1,36 +1,39 @@
-# Captcha Solver Frontend
+# 🧠 Captcha Solver – AI-Powered Captcha Recognition
 
-This is the frontend for the Captcha Solver SaaS application, hosted on GitHub Pages.
+This is a full-stack application that automatically solves image-based CAPTCHAs using deep learning. It features a FastAPI backend and a TailwindCSS frontend.
 
-## Features
+---
 
-- Modern, responsive UI built with Tailwind CSS
-- User registration and login functionality
-- CAPTCHA solving demo interface
-- Payment integration with UPI
-- Mobile-friendly design
+## 🚀 Live Demo
 
-## Deployment
+- **Frontend**: [https://cap-solver-1.onrender.com](https://cap-solver-1.onrender.com)  
+- **Backend**: [https://cap-solver.onrender.com](https://cap-solver.onrender.com)
 
-This frontend is automatically deployed to GitHub Pages. The site is available at:
-https://aditya-singh0.github.io/cap-solver-frontend/
+---
 
-## Backend
+## 🛠 Tech Stack
 
-The backend API is hosted on Railway at:
-https://your-railway-app-name.railway.app
+- **Frontend**: TailwindCSS, React, Vite
+- **Backend**: FastAPI, Uvicorn
+- **Model**: Custom CNN for image classification
+- **Deployment**: Render (Frontend & Backend), Docker
 
-## Local Development
+---
 
-To run the frontend locally:
+## 📸 Features
+
+- Upload a CAPTCHA image
+- Model predicts the correct characters
+- Real-time response
+- API-based backend logic
+
+---
+
+## 📦 Installation
+
+### Frontend
 
 ```bash
-# Serve the static files
-python3 -m http.server 8080 --directory .
-```
-
-Then visit http://localhost:8080
-
-## API Configuration
-
-Update the `API_BASE_URL` in `index.html` to point to your Railway backend URL. 
+cd frontend
+npm install
+npm run dev
